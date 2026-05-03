@@ -1,0 +1,72 @@
+    <Window xmlns="https://github.com/avaloniaui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:vm="using:CopperIPTV.ViewModels"
+            xmlns:views="using:CopperIPTV.Views"
+            x:Class="CopperIPTV.Views.MainWindow"
+            x:DataType="vm:MainViewModel"
+            Title="Copper IPTV Player"
+            Width="1280" Height="720"
+            MinWidth="1000" MinHeight="600"
+            WindowStartupLocation="CenterScreen"
+            SystemDecorations="Full"
+            CanResize="True"
+            Background="#0a0a0a"
+            Focusable="True"
+            KeyDown="OnKeyDown">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding IsPlayerActive, Converter={StaticResource BooleanToWidthConverter}}" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Classes="sidebar" BorderBrush="#2a2a2a" BorderThickness="0,0,1,0"
+                IsVisible="{Binding IsPlayerActive, Converter={StaticResource InvertedBoolConverter}}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="20,24,20,16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <TextBlock Text="📺" FontSize="28" />
+                        <TextBlock Text="Copper IPTV" FontSize="18" FontWeight="Bold" Classes="accent" VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Top" Margin="12,0,12,16" Spacing="4">
+                    <Button Content="📺  Live TV" HorizontalContentAlignment="Left" Padding="14,12"
+                            Background="Transparent" Foreground="#b0b0b0" BorderThickness="0" CornerRadius="8" FontSize="14"
+                            Command="{Binding NavigateToCommand}" CommandParameter="Dashboard" />
+                    <Button Content="🕒  Recent" HorizontalContentAlignment="Left" Padding="14,12"
+                            Background="Transparent" Foreground="#b0b0b0" BorderThickness="0" CornerRadius="8" FontSize="14"
+                            Command="{Binding NavigateToCommand}" CommandParameter="RecentChannels" />
+                    <Button Content="❤️  Favorites" HorizontalContentAlignment="Left" Padding="14,12"
+                            Background="Transparent" Foreground="#b0b0b0" BorderThickness="0" CornerRadius="8" FontSize="14"
+                            Command="{Binding NavigateToCommand}" CommandParameter="Favorites" />
+                    <Button Content="⚙️  Settings" HorizontalContentAlignment="Left" Padding="14,12"
+                            Background="Transparent" Foreground="#b0b0b0" BorderThickness="0" CornerRadius="8" FontSize="14"
+                            Command="{Binding NavigateToCommand}" CommandParameter="Settings" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Content Area -->
+        <ContentControl Grid.Column="1" Content="{Binding CurrentView}">
+            <ContentControl.DataTemplates>
+                <DataTemplate DataType="vm:DashboardViewModel">
+                    <views:DashboardView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:PlayerViewModel">
+                    <views:PlayerView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:FavoritesViewModel">
+                    <views:FavoritesView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:RecentChannelsViewModel">
+                    <views:RecentChannelsView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:SettingsViewModel">
+                    <views:SettingsView />
+                </DataTemplate>
+            </ContentControl.DataTemplates>
+        </ContentControl>
+    </Grid>
+</Window>

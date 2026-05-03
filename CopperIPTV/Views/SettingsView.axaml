@@ -1,0 +1,274 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CopperIPTV.ViewModels"
+             xmlns:views="using:CopperIPTV.Views"
+             x:Class="CopperIPTV.Views.SettingsView"
+             x:Name="SettingsRoot"
+             x:DataType="vm:SettingsViewModel"
+             Padding="24">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="24">
+            <TextBlock Text="Settings" FontSize="28" FontWeight="Bold" />
+
+            <!-- Status Message -->
+            <TextBlock Text="{Binding StatusMessage}" Classes="subtitle"
+                       IsVisible="{Binding StatusMessage, Converter={StaticResource NotNullConverter}}" />
+
+            <!-- Playlists Section -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <TextBlock Text="Your Playlists" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Button Classes="accent" Content="+ Add Playlist" Command="{Binding ShowAddPlaylistCommand}" />
+                    </StackPanel>
+
+                    <!-- Add Form -->
+                    <StackPanel Spacing="12" IsVisible="{Binding ShowAddForm}">
+                        <TextBox Text="{Binding PlaylistName}" Watermark="Playlist Name (optional)" />
+
+                        <!-- URL Tab -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Add from URL" FontWeight="SemiBold" FontSize="14" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBox Text="{Binding PlaylistUrl}" Watermark="http://example.com/playlist.m3u" Width="400" />
+                                <Button Classes="accent" Content="Fetch" Command="{Binding AddFromUrlCommand}"
+                                        IsEnabled="{Binding !IsLoading}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Height="1" Background="#2a2a2a" />
+
+                        <!-- FG Code Tab -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Add from FG Code (DramaLive)" FontWeight="SemiBold" FontSize="14" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBox Text="{Binding FgCode}" Watermark="232425 or fgcode.org/232425" Width="400" />
+                                <Button Classes="accent" Content="Fetch" Command="{Binding AddFromFgCodeCommand}"
+                                        IsEnabled="{Binding !IsLoading}" />
+                            </StackPanel>
+                            <TextBlock Text="Enter just the code number or full fgcode.org URL" Classes="muted" FontSize="11" />
+                        </StackPanel>
+
+                        <Border Height="1" Background="#2a2a2a" />
+
+                        <!-- File Tab -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Add from File" FontWeight="SemiBold" FontSize="14" />
+                            <Button Content="📁 Select M3U File" Command="{Binding AddFromFileCommand}"
+                                    IsEnabled="{Binding !IsLoading}" HorizontalAlignment="Left" />
+                        </StackPanel>
+
+                        <Border Height="1" Background="#2a2a2a" />
+
+                        <!-- Paste Tab -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Paste M3U Content" FontWeight="SemiBold" FontSize="14" />
+                            <TextBox Text="{Binding RawContent}" Watermark="Paste your M3U content here..."
+                                     AcceptsReturn="True" TextWrapping="Wrap" Height="120" />
+                            <Button Classes="accent" Content="Parse Content" Command="{Binding AddFromPasteCommand}"
+                                    IsEnabled="{Binding !IsLoading}" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Playlists List -->
+                    <StackPanel Spacing="8" IsVisible="{Binding Playlists.Count, Converter={StaticResource GreaterThanZeroConverter}}">
+                        <ItemsControl ItemsSource="{Binding Playlists}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Classes="card" Padding="16" Margin="0,4">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Medium" />
+                                                <TextBlock Classes="subtitle" Text="{Binding ChannelCount, StringFormat='{}{0} channels • Added {1:d}'}" />
+                                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                                    <TextBlock Text="Auto-refresh: " Classes="muted" FontSize="11" />
+                                                    <TextBlock FontSize="11">
+                                                        <TextBlock.Text>
+                                                            <Binding Path="AutoRefresh" Converter="{StaticResource BoolToStatusConverter}" />
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding LastRefreshed, StringFormat='Last: {0:g}'}" Classes="muted" FontSize="11"
+                                                               IsVisible="{Binding LastRefreshed, Converter={StaticResource NotNullConverter}}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                <Button Content="🔄" Padding="8" Click="OnRefreshPlaylist" ToolTip.Tip="Refresh Now" />
+                                                <Button Classes="danger" Content="🗑️ Remove"
+                                                        Click="OnRemovePlaylist" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Empty -->
+                    <TextBlock Text="No playlists added yet" Classes="muted" HorizontalAlignment="Center"
+                               IsVisible="{Binding Playlists.Count, Converter={StaticResource IsZeroConverter}}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Xtream Codes Section -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <TextBlock Text="Xtream Codes" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Button Classes="accent" Content="+ Add Account" Command="{Binding ToggleXtreamFormCommand}" />
+                    </StackPanel>
+
+                    <!-- Xtream Login Form -->
+                    <StackPanel Spacing="12" IsVisible="{Binding ShowXtreamForm}">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Server URL" FontWeight="SemiBold" FontSize="14" />
+                            <TextBox Text="{Binding XtreamServerUrl}" Watermark="http://example.com:8080" Width="400" />
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Username" FontWeight="SemiBold" FontSize="14" />
+                            <TextBox Text="{Binding XtreamUsername}" Watermark="Enter username" Width="400" />
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Password" FontWeight="SemiBold" FontSize="14" />
+                            <TextBox Text="{Binding XtreamPassword}" Watermark="Enter password" Width="400" />
+                        </StackPanel>
+                        <CheckBox Content="Include VOD (Movies)" IsChecked="{Binding IncludeVod}" />
+                        <TextBlock Text="{Binding XtreamStatus}" Classes="subtitle" FontSize="12"
+                                   IsVisible="{Binding XtreamStatus, Converter={StaticResource NotEmptyStringConverter}}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="accent" Content="Login &amp; Sync" Command="{Binding LoginToXtreamCommand}"
+                                    IsEnabled="{Binding !IsXtreamSyncing}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Xtream Accounts List -->
+                    <StackPanel Spacing="8" IsVisible="{Binding XtreamAccounts.Count, Converter={StaticResource GreaterThanZeroConverter}}">
+                        <ItemsControl ItemsSource="{Binding XtreamAccounts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Classes="card" Padding="16" Margin="0,4">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{Binding ServerName}" FontSize="15" FontWeight="Medium" />
+                                                <TextBlock Classes="subtitle"
+                                                           Text="{Binding LiveCount, StringFormat='{}{0} live channels'}" />
+                                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+                                                    <TextBlock Classes="muted" FontSize="11"
+                                                               Text="{Binding VodCount, StringFormat='{}{0} VOD'}" />
+                                                    <TextBlock Classes="muted" FontSize="11"
+                                                               Text="{Binding LastSynced, StringFormat='Last synced: {0:g}'}"
+                                                               IsVisible="{Binding LastSynced, Converter={StaticResource NotNullConverter}}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                <Button Content="🔄" Padding="8" Click="OnRefreshXtream" ToolTip.Tip="Refresh Now" />
+                                                <Button Classes="danger" Content="🗑️ Remove" Click="OnRemoveXtream" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Empty -->
+                    <TextBlock Text="No Xtream accounts added" Classes="muted" HorizontalAlignment="Center"
+                               IsVisible="{Binding XtreamAccounts.Count, Converter={StaticResource IsZeroConverter}}" />
+                </StackPanel>
+            </Border>
+
+            <!-- EPG Section -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="TV Guide (EPG)" FontSize="20" FontWeight="SemiBold" />
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="EPG XML URL (XMLTV format)" FontWeight="SemiBold" FontSize="14" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBox Text="{Binding EpgUrl}" Watermark="http://example.com/epg.xml" Width="400" />
+                            <Button Classes="accent" Content="Refresh EPG" Command="{Binding RefreshEpgCommand}"
+                                    IsEnabled="{Binding !IsRefreshingEpg}" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding EpgStatus}" Classes="muted" FontSize="12" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Playback Settings -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Playback" FontSize="20" FontWeight="SemiBold" />
+                    <Grid ColumnDefinitions="Auto,*">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBlock Text="Default Volume" VerticalAlignment="Center" MinWidth="120" />
+                                <Slider Value="{Binding DefaultVolume}" Minimum="0" Maximum="100" Width="200" />
+                                <TextBlock Text="{Binding DefaultVolume, StringFormat='{}{0}%'}" VerticalAlignment="Center" MinWidth="40" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBlock Text="Network Caching (ms)" VerticalAlignment="Center" MinWidth="120" />
+                                <Slider Value="{Binding NetworkCaching}" Minimum="500" Maximum="10000" Width="200" TickFrequency="500" />
+                                <TextBlock Text="{Binding NetworkCaching, StringFormat='{}{0}ms'}" VerticalAlignment="Center" MinWidth="60" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Services Section -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Services" FontSize="20" FontWeight="SemiBold" />
+
+                    <!-- Stream Health Check -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Stream Health Check" FontWeight="SemiBold" FontSize="14" />
+                            <TextBlock Text="{Binding HealthStatus}" Classes="muted" FontSize="12" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1">
+                            <Button Content="▶ Check Now" Command="{Binding RunHealthCheckNowCommand}" />
+                            <Button Classes="accent" Content="Toggle" Command="{Binding ToggleHealthCheckCommand}" Width="120" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="#2a2a2a" />
+
+                    <!-- Playlist Auto-Refresh -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Playlist Auto-Refresh" FontWeight="SemiBold" FontSize="14" />
+                            <TextBlock Text="{Binding RefreshStatus}" Classes="muted" FontSize="12" />
+                        </StackPanel>
+                        <Button Classes="accent" Content="Toggle" Command="{Binding TogglePlaylistRefreshServiceCommand}" Width="120" Grid.Column="1" />
+                    </Grid>
+
+                    <Border Height="1" Background="#2a2a2a" />
+
+                    <!-- Recent Channels -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Recent Channels" FontWeight="SemiBold" FontSize="14" />
+                            <TextBlock Text="{Binding RecentChannelCount, StringFormat='{}{0} channels watched'}" Classes="muted" FontSize="12" />
+                        </StackPanel>
+                        <Button Classes="danger" Content="Clear History" Command="{Binding ClearRecentChannelsCommand}" Grid.Column="1" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Save Button -->
+            <Button Classes="accent" Content="💾 Save Settings" Command="{Binding SaveSettingsCommand}" HorizontalAlignment="Left" Padding="24,12" FontSize="14" />
+
+            <!-- Debug Log -->
+            <Border Classes="card" Padding="0">
+                <Grid RowDefinitions="Auto,*">
+                    <Button Grid.Row="0" Content="🔧 Debug Log" Padding="24,16" HorizontalContentAlignment="Left"
+                            Background="Transparent" Foreground="#ffffff" BorderThickness="0" FontSize="16" FontWeight="SemiBold"
+                            Command="{Binding ToggleLogCommand}" />
+                    <Border Grid.Row="1" Height="300" IsVisible="{Binding ShowLog}" BorderBrush="#2a2a2a" BorderThickness="0,1,0,0">
+                        <views:LogView />
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

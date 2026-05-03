@@ -1,0 +1,24 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:CopperIPTV.Converters"
+             x:Class="CopperIPTV.App"
+             RequestedThemeVariant="Dark">
+     <Application.Resources>
+          <c:NotNullConverter x:Key="NotNullConverter" />
+          <c:NotEmptyStringConverter x:Key="NotEmptyStringConverter" />
+          <c:EmptyStringConverter x:Key="EmptyStringConverter" />
+          <c:FirstCharConverter x:Key="FirstCharConverter" />
+          <c:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter" />
+          <c:IsZeroConverter x:Key="IsZeroConverter" />
+          <c:LogLevelToTextConverter x:Key="LogLevelToTextConverter" />
+          <c:LogLevelToColorConverter x:Key="LogLevelToColorConverter" />
+          <c:LogLevelToBgColorConverter x:Key="LogLevelToBgColorConverter" />
+          <c:BoolToStatusConverter x:Key="BoolToStatusConverter" />
+          <c:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+          <c:BooleanToWidthConverter x:Key="BooleanToWidthConverter" />
+     </Application.Resources>
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://CopperIPTV/Themes/CopperTheme.axaml" />
+    </Application.Styles>
+</Application>

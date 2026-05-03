@@ -1,0 +1,89 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CopperIPTV.ViewModels"
+             xmlns:m="using:CopperIPTV.Models"
+             x:Class="CopperIPTV.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel"
+             Padding="24">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <StackPanel Grid.Row="0" Spacing="16" Margin="0,0,0,24">
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <TextBlock Text="Live TV" FontSize="28" FontWeight="Bold" />
+                <Button Content="🔄 Refresh" Command="{Binding RefreshCommand}" Padding="12,8" />
+            </StackPanel>
+            <TextBox Text="{Binding SearchQuery}" Watermark="Search channels..." />
+            <TextBlock Text="{Binding AllChannels.Count, StringFormat='{}{0} channels total'}" Classes="muted" FontSize="12" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,24">
+            <ItemsControl ItemsSource="{Binding Categories}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding}" Padding="16,8" CornerRadius="20"
+                                Background="#1e1e1e" Foreground="#b0b0b0" FontSize="13" FontWeight="Medium"
+                                Click="OnCategoryClick" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16"
+                        IsVisible="{Binding !HasChannels}">
+                <TextBlock Text="📺" FontSize="64" HorizontalAlignment="Center" />
+                <TextBlock Text="No Channels Yet" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                <TextBlock Text="Add an M3U playlist in Settings to start watching live TV" Classes="subtitle" HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasChannels}">
+                <ItemsControl ItemsSource="{Binding FilteredChannels}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="m:Channel">
+                            <Button Margin="10" Padding="0" Background="Transparent" BorderThickness="0"
+                                    Click="OnChannelClick" Width="220">
+                                <Border Classes="card" Width="200">
+                                    <StackPanel>
+                                        <Border Height="113" Background="#1a1a1a" CornerRadius="12,12,0,0">
+                                            <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Image x:Name="ChLogo" Source="{Binding Logo}" MaxWidth="120" MaxHeight="80" Stretch="Uniform"
+                                                       IsVisible="{Binding Logo, Converter={StaticResource NotEmptyStringConverter}}" />
+                                                <Border x:Name="ChPlaceholder" Width="60" Height="60" CornerRadius="30" Background="#c4781a"
+                                                        IsVisible="{Binding Logo, Converter={StaticResource EmptyStringConverter}}">
+                                                    <TextBlock x:Name="ChLetter" FontSize="28" FontWeight="Bold"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Text="{Binding Name, Converter={StaticResource FirstCharConverter}}"
+                                                               Foreground="#ffffff" />
+                                                </Border>
+                                            </Panel>
+                                        </Border>
+                                        <StackPanel Margin="12">
+                                            <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Group}" Classes="muted" FontSize="11" Margin="0,2,0,0" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                                <TextBlock Text="{Binding Language}" Classes="muted" FontSize="10"
+                                                           IsVisible="{Binding Language, Converter={StaticResource NotEmptyStringConverter}}" />
+                                                <TextBlock Text="{Binding Country}" Classes="muted" FontSize="10"
+                                                           IsVisible="{Binding Country, Converter={StaticResource NotEmptyStringConverter}}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

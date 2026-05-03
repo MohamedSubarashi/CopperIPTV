@@ -1,0 +1,62 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CopperIPTV.ViewModels"
+             xmlns:m="using:CopperIPTV.Models"
+             x:Class="CopperIPTV.Views.RecentChannelsView"
+             x:DataType="vm:RecentChannelsViewModel"
+             Padding="24">
+
+    <Grid RowDefinitions="Auto,*">
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,24">
+            <TextBlock Text="Recent Channels" FontSize="28" FontWeight="Bold" />
+            <TextBlock Classes="subtitle" Text="{Binding RecentChannels.Count, StringFormat='{}{0} recently watched channels'}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16"
+                        IsVisible="{Binding !HasRecentChannels}">
+                <TextBlock Text="🕒" FontSize="64" HorizontalAlignment="Center" />
+                <TextBlock Text="No Recent Channels" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                <TextBlock Text="Channels you watch will appear here" Classes="subtitle" HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasRecentChannels}">
+                <ItemsControl ItemsSource="{Binding RecentChannels}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="m:Channel">
+                            <Button Margin="10" Padding="0" Background="Transparent" BorderThickness="0"
+                                    Click="OnChannelClick" Width="220">
+                                <Border Classes="card" Width="200">
+                                    <StackPanel>
+                                        <Border Height="113" Background="#1a1a1a" CornerRadius="12,12,0,0">
+                                            <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Image x:Name="RecChLogo" Source="{Binding Logo}" MaxWidth="120" MaxHeight="80" Stretch="Uniform"
+                                                       IsVisible="{Binding Logo, Converter={StaticResource NotEmptyStringConverter}}" />
+                                                <Border x:Name="RecChPlaceholder" Width="60" Height="60" CornerRadius="30" Background="#c4781a"
+                                                        IsVisible="{Binding Logo, Converter={StaticResource EmptyStringConverter}}">
+                                                    <TextBlock FontSize="28" FontWeight="Bold"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Text="{Binding Name, Converter={StaticResource FirstCharConverter}}"
+                                                               Foreground="#ffffff" />
+                                                </Border>
+                                            </Panel>
+                                        </Border>
+                                        <StackPanel Margin="12">
+                                            <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Group}" Classes="muted" FontSize="11" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>
