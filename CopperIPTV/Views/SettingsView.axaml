@@ -1,7 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CopperIPTV.ViewModels"
-             xmlns:views="using:CopperIPTV.Views"
              x:Class="CopperIPTV.Views.SettingsView"
              x:Name="SettingsRoot"
              x:DataType="vm:SettingsViewModel"
@@ -252,17 +251,6 @@
             <!-- Save Button -->
             <Button Classes="accent" Content="💾 Save Settings" Command="{Binding SaveSettingsCommand}" HorizontalAlignment="Left" Padding="24,12" FontSize="14" />
 
-            <!-- Debug Log -->
-            <Border Classes="card" Padding="0">
-                <Grid RowDefinitions="Auto,*">
-                    <Button Grid.Row="0" Content="🔧 Debug Log" Padding="24,16" HorizontalContentAlignment="Left"
-                            Background="Transparent" Foreground="#ffffff" BorderThickness="0" FontSize="16" FontWeight="SemiBold"
-                            Command="{Binding ToggleLogCommand}" />
-                    <Border Grid.Row="1" Height="300" IsVisible="{Binding ShowLog}" BorderBrush="#2a2a2a" BorderThickness="0,1,0,0">
-                        <views:LogView />
-                    </Border>
-                </Grid>
-            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -10,9 +10,6 @@
           <c:FirstCharConverter x:Key="FirstCharConverter" />
           <c:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter" />
           <c:IsZeroConverter x:Key="IsZeroConverter" />
-          <c:LogLevelToTextConverter x:Key="LogLevelToTextConverter" />
-          <c:LogLevelToColorConverter x:Key="LogLevelToColorConverter" />
-          <c:LogLevelToBgColorConverter x:Key="LogLevelToBgColorConverter" />
           <c:BoolToStatusConverter x:Key="BoolToStatusConverter" />
           <c:InvertedBoolConverter x:Key="InvertedBoolConverter" />
           <c:BooleanToWidthConverter x:Key="BooleanToWidthConverter" />

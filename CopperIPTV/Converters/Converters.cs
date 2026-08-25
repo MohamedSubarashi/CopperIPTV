@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using CopperIPTV.Services;
 
 namespace CopperIPTV.Converters;
 
@@ -80,66 +79,6 @@ public class IsZeroConverter : IValueConverter
     {
         if (value is int i) return i == 0;
         return true;
-    }
-
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class LogLevelToTextConverter : IValueConverter
-{
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value switch
-        {
-            LogLevel.Debug => "DEBUG",
-            LogLevel.Info => "INFO",
-            LogLevel.Warning => "WARN",
-            LogLevel.Error => "ERROR",
-            _ => "UNKNOWN"
-        };
-    }
-
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class LogLevelToColorConverter : IValueConverter
-{
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value switch
-        {
-            LogLevel.Debug => (IBrush)Brush.Parse("#888888"),
-            LogLevel.Info => (IBrush)Brush.Parse("#4caf50"),
-            LogLevel.Warning => (IBrush)Brush.Parse("#ffc107"),
-            LogLevel.Error => (IBrush)Brush.Parse("#f44336"),
-            _ => (IBrush)Brush.Parse("#ffffff")
-        };
-    }
-
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class LogLevelToBgColorConverter : IValueConverter
-{
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value switch
-        {
-            LogLevel.Debug => (IBrush)Brush.Parse("#333333"),
-            LogLevel.Info => (IBrush)Brush.Parse("#1b3a1b"),
-            LogLevel.Warning => (IBrush)Brush.Parse("#3a3a1b"),
-            LogLevel.Error => (IBrush)Brush.Parse("#3a1b1b"),
-            _ => (IBrush)Brush.Parse("#1e1e1e")
-        };
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

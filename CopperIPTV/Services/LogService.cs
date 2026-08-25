@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.CompilerServices;
-using Avalonia.Threading;
 
 namespace CopperIPTV.Services;
 
@@ -15,35 +12,19 @@ public enum LogLevel
     Error
 }
 
-public class LogEntry
-{
-    public DateTime Timestamp { get; set; }
-    public LogLevel Level { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string Source { get; set; } = string.Empty;
-    public string FormattedTime => Timestamp.ToString("HH:mm:ss.fff");
-}
-
 public static class LogService
 {
-    private static readonly ObservableCollection<LogEntry> _entries = [];
     private static readonly object _lock = new();
-    private const int MaxEntries = 1000;
     private const long MaxFileSize = 5 * 1024 * 1024;
     private static readonly string _logFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "CopperIPTV", "copper_iptv.log");
+        "CopperIPTV", "copperiptv.log.txt");
 
-    public static IReadOnlyList<LogEntry> Entries => _entries;
-    public static event Action<LogEntry>? OnLogAdded;
+    public static string LogFilePath => _logFilePath;
 
     static LogService()
     {
-        try
-        {
-            var dir = Path.GetDirectoryName(_logFilePath)!;
-            Directory.CreateDirectory(dir);
-        }
+        try { Directory.CreateDirectory(Path.GetDirectoryName(_logFilePath)!); }
         catch { }
     }
 
@@ -67,54 +48,18 @@ public static class LogService
 
     private static void AddEntry(LogLevel level, string message, string source)
     {
-        var entry = new LogEntry
-        {
-            Timestamp = DateTime.Now,
-            Level = level,
-            Message = message,
-            Source = source
-        };
-
+        var ts = DateTime.Now;
         lock (_lock)
         {
-            var consoleColor = level switch
-            {
-                LogLevel.Debug => ConsoleColor.DarkGray,
-                LogLevel.Info => ConsoleColor.Green,
-                LogLevel.Warning => ConsoleColor.Yellow,
-                LogLevel.Error => ConsoleColor.Red,
-                _ => ConsoleColor.White
-            };
-
-            Console.ForegroundColor = consoleColor;
-            Console.WriteLine($"[{entry.FormattedTime}] [{level,-7}] [{source}] {message}");
-            Console.ResetColor();
-
             try
             {
                 if (File.Exists(_logFilePath) && new FileInfo(_logFilePath).Length > MaxFileSize)
                     File.Delete(_logFilePath);
 
-                var fileLine = $"[{entry.Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{level,-7}] [{source}] {message}";
-                File.AppendAllText(_logFilePath, fileLine + Environment.NewLine);
+                var line = $"[{ts:yyyy-MM-dd HH:mm:ss.fff}] [{level,-7}] [{source}] {message}";
+                File.AppendAllText(_logFilePath, line + Environment.NewLine);
             }
             catch { }
-
-            // Trim + add atomically on the UI thread so concurrent posts and
-            // Clear() can never interleave into an out-of-range RemoveAt.
-            Dispatcher.UIThread.Post(() =>
-            {
-                while (_entries.Count >= MaxEntries)
-                    _entries.RemoveAt(0);
-                _entries.Add(entry);
-                OnLogAdded?.Invoke(entry);
-            });
         }
-    }
-
-    public static void Clear()
-    {
-        lock (_lock)
-            Dispatcher.UIThread.Post(() => _entries.Clear());
     }
 }

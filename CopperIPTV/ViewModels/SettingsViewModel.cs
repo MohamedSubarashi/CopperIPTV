@@ -43,9 +43,6 @@ public partial class SettingsViewModel : ViewModelBase
     private int _addMode;
 
     [ObservableProperty]
-    private bool _showLog;
-
-    [ObservableProperty]
     private string _epgUrl = "";
 
     [ObservableProperty]
@@ -257,12 +254,6 @@ public partial class SettingsViewModel : ViewModelBase
     private void ShowAddPlaylist()
     {
         ShowAddForm = !ShowAddForm;
-    }
-
-    [RelayCommand]
-    private void ToggleLog()
-    {
-        ShowLog = !ShowLog;
     }
 
     [RelayCommand]
