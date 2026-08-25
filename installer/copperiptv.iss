@@ -1,13 +1,13 @@
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 AppName=Copper IPTV Player
-AppVersion=1.0.1
+AppVersion=1.0.2
 AppPublisher=Mohamed Subarashi
 AppPublisherURL=https://github.com/MohamedSubarashi/CopperIPTV
 DefaultDirName={autopf}\CopperIPTV
 DefaultGroupName=Copper IPTV Player
 OutputDir=installer
-OutputBaseFilename=CopperIPTV-1.0.1-Setup
+OutputBaseFilename=CopperIPTV-1.0.2-Setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesAllowed=x64compatible

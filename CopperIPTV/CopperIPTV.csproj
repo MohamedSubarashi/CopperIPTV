@@ -9,7 +9,7 @@
     <RootNamespace>CopperIPTV</RootNamespace>
     <AssemblyName>CopperIPTV</AssemblyName>
     <ApplicationIcon>Assets\App.ico</ApplicationIcon>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>Copper IPTV</Authors>
     <Description>A modern, cross-platform IPTV player supporting M3U playlists and Xtream Codes.</Description>
     <!-- RuntimeIdentifier/self-contained are chosen at publish time:
