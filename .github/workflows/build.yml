@@ -48,6 +48,23 @@ jobs:
           path: publish/${{ matrix.rid }}/
           retention-days: 30
 
+      - name: Install Inno Setup
+        if: matrix.rid == 'win-x64'
+        run: choco install innosetup -y
+
+      - name: Build Windows installer
+        if: matrix.rid == 'win-x64'
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\copperiptv.iss
+
+      - name: Upload installer
+        if: matrix.rid == 'win-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: CopperIPTV-Installer
+          path: installer/*.exe
+          retention-days: 30
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
@@ -65,12 +82,21 @@ jobs:
           cd artifacts
           for dir in CopperIPTV-*/; do
             name="${dir%/}"
-            cd "$name"
-            zip -r "../${name}.zip" . -x "*/\.*"
-            cd ..
+            if [ "$name" != "CopperIPTV-Installer" ]; then
+              cd "$name"
+              zip -r "../${name}.zip" . -x "*/\.*"
+              cd ..
+            fi
           done
 
-      - name: Create release with zips
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          cp artifacts/*.zip release/ 2>/dev/null || true
+          cp artifacts/CopperIPTV-Installer/*.exe release/ 2>/dev/null || true
+          ls -lh release/
+
+      - name: Create release with zips + installer
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*.zip
+          files: release/*
