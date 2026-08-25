@@ -33,4 +33,4 @@ Name: "{group}\Uninstall Copper IPTV Player"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\Copper IPTV Player"; Filename: "{app}\CopperIPTV.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\CopperIPTV.exe"; Description: "Launch Copper IPTV Player"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\CopperIPTV.exe"; Description: "Launch Copper IPTV Player"; Flags: nowait postinstall
