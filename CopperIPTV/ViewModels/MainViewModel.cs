@@ -51,6 +51,7 @@ public partial class MainViewModel : ViewModelBase
             "Favorites" => new FavoritesViewModel(this),
             "RecentChannels" => new RecentChannelsViewModel(this),
             "Settings" => new SettingsViewModel(this),
+            "About" => new AboutViewModel(),
             _ => CurrentView
         };
     }

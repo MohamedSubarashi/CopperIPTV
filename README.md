@@ -3,6 +3,7 @@
 A modern, cross-platform IPTV player built with Avalonia UI and LibVLC. Supports M3U playlists, Xtream Codes, XMLTV EPG, favorites, recents, stream health monitoring and auto-refresh.
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20The%20Project-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/mohamedsubarashi)
 
 ## Features
 
@@ -14,20 +15,28 @@ A modern, cross-platform IPTV player built with Avalonia UI and LibVLC. Supports
 - Stream health checks with automatic fallback URL switching
 - Playlist auto-refresh
 - Search and category filtering
+- Cross-platform support: Windows, Linux, macOS
 
 ## Downloads
 
-Prebuilt binaries for every platform are produced by GitHub Actions on every push:
+### Stable Releases
+
+Download the latest stable release from the [Releases page](https://github.com/MohamedSubarashi/CopperIPTV/releases/latest):
+
+- **Windows 10/11 (x64)**: `CopperIPTV-win-x64.zip` - Self-contained, no dependencies
+- **Linux (x64)**: `CopperIPTV-linux-x64.zip` - Self-contained, requires system VLC
+- **macOS (Intel)**: `CopperIPTV-osx-x64.zip` - Requires VLC installed
+- **macOS (Apple Silicon)**: `CopperIPTV-osx-arm64.zip` - Requires VLC installed
+
+### Development Builds
+
+Every push to the repository automatically builds binaries for all platforms via GitHub Actions:
 
 1. Open the **Actions** tab on the repository
 2. Select the latest successful **Build** run
-3. Download your platform's artifact from the **Artifacts** section:
-   - `CopperIPTV-win-x64` - Windows 10/11 (64-bit), fully self-contained
-   - `CopperIPTV-linux-x64` - Linux x64, self-contained (.NET included)
-   - `CopperIPTV-osx-x64` - macOS Intel
-   - `CopperIPTV-osx-arm64` - macOS Apple Silicon
+3. Download your platform's artifact from the **Artifacts** section
 
-## Runtime requirements
+## Runtime Requirements
 
 | Platform | Requirement |
 |----------|-------------|
@@ -37,7 +46,7 @@ Prebuilt binaries for every platform are produced by GitHub Actions on every pus
 
 The app itself is self-contained on all platforms (no .NET installation required).
 
-## Building from source
+## Building from Source
 
 Requires the .NET 8 SDK.
 
@@ -54,7 +63,15 @@ dotnet publish CopperIPTV/CopperIPTV.csproj -c Release -r osx-arm64 --self-conta
 
 On Linux/macOS the build does not bundle libVLC; it is resolved at runtime from the system install.
 
-## Tech stack
+## Support the Project
+
+If you enjoy Copper IPTV Player and want to help development, consider supporting the project:
+
+[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/mohamedsubarashi)
+
+Donations help keep the project alive and free for everyone.
+
+## Technology
 
 - [.NET 8](https://dotnet.microsoft.com/) + [Avalonia UI 11](https://avaloniaui.net/)
 - [LibVLCSharp](https://code.videolan.org/videolan/LibVLCSharp) for playback
@@ -63,3 +80,7 @@ On Linux/macOS the build does not bundle libVLC; it is resolved at runtime from 
 ## License
 
 All rights reserved.
+
+## Author
+
+Created by [Mohamed Subarashi](https://github.com/MohamedSubarashi)

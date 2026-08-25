@@ -43,6 +43,9 @@
                     <Button Content="⚙️  Settings" HorizontalContentAlignment="Left" Padding="14,12"
                             Background="Transparent" Foreground="#b0b0b0" BorderThickness="0" CornerRadius="8" FontSize="14"
                             Command="{Binding NavigateToCommand}" CommandParameter="Settings" />
+                    <Button Content="ℹ️  About" HorizontalContentAlignment="Left" Padding="14,12"
+                            Background="Transparent" Foreground="#b0b0b0" BorderThickness="0" CornerRadius="8" FontSize="14"
+                            Command="{Binding NavigateToCommand}" CommandParameter="About" />
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -64,6 +67,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="vm:SettingsViewModel">
                     <views:SettingsView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:AboutViewModel">
+                    <views:AboutView />
                 </DataTemplate>
             </ContentControl.DataTemplates>
         </ContentControl>

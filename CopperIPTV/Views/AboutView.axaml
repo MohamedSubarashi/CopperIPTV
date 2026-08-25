@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CopperIPTV.ViewModels"
+             x:Class="CopperIPTV.Views.AboutView"
+             x:DataType="vm:AboutViewModel"
+             Padding="24">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="720" HorizontalAlignment="Left" Spacing="24">
+            <TextBlock Text="About" FontSize="28" FontWeight="Bold" />
+
+            <!-- App identity -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock Text="📺" FontSize="42" />
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding AppName}" FontSize="24" FontWeight="SemiBold" />
+                            <TextBlock Classes="subtitle" Text="{Binding Version, StringFormat='Version {0}'}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                    <TextBlock Classes="muted" Text="{Binding Copyright}" Margin="0,4,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Support -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Support the Project" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock TextWrapping="Wrap"
+                               Text="If you enjoy Copper IPTV Player and want to help development, consider buying me a coffee. Donations keep the project alive and free." />
+                    <Button Classes="accent" Content="☕ Donate on Ko-fi" Click="OnDonateClick"
+                            HorizontalAlignment="Left" Padding="16,10" />
+                    <TextBlock Classes="muted" FontSize="11"
+                               Text="ko-fi.com/mohamedsubarashi" />
+                </StackPanel>
+            </Border>
+
+            <!-- Tech stack -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Technology" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="• .NET 8 + Avalonia UI 11 (cross-platform UI)" />
+                    <TextBlock Text="• LibVLCSharp for video playback" />
+                    <TextBlock Text="• SQLite for playlists, EPG and settings" />
+                </StackPanel>
+            </Border>
+
+            <!-- Links -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Links" FontSize="18" FontWeight="SemiBold" />
+                    <Button Content="🌐 GitHub Repository" Click="OnGitHubClick"
+                            HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

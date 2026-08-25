@@ -59,11 +59,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Create platform zips
+        run: |
+          cd artifacts
+          for dir in CopperIPTV-*/; do
+            name="${dir%/}"
+            cd "$name"
+            zip -r "../${name}.zip" . -x "*/\.*"
+            cd ..
+          done
+
       - name: Create release with zips
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            CopperIPTV-win-x64/*
-            CopperIPTV-linux-x64/*
-            CopperIPTV-osx-x64/*
-            CopperIPTV-osx-arm64/*
+          files: artifacts/*.zip
