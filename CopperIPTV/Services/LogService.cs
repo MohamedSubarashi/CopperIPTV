@@ -100,11 +100,12 @@ public static class LogService
             }
             catch { }
 
-            if (_entries.Count >= MaxEntries)
-                Dispatcher.UIThread.Post(() => _entries.RemoveAt(0));
-
+            // Trim + add atomically on the UI thread so concurrent posts and
+            // Clear() can never interleave into an out-of-range RemoveAt.
             Dispatcher.UIThread.Post(() =>
             {
+                while (_entries.Count >= MaxEntries)
+                    _entries.RemoveAt(0);
                 _entries.Add(entry);
                 OnLogAdded?.Invoke(entry);
             });

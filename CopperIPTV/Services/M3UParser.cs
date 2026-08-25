@@ -79,7 +79,15 @@ public static class M3UParser
         var channel = new Models.Channel();
         var infoPart = line.Substring(8);
 
-        var commaIndex = infoPart.LastIndexOf(',');
+        // The display name starts at the first comma AFTER the attribute
+        // section (i.e. after the last closing quote). Splitting on the last
+        // comma corrupts names that themselves contain commas.
+        var lastQuote = infoPart.LastIndexOf('"');
+        var searchStart = lastQuote < 0 ? 0 : lastQuote + 1;
+        var commaIndex = infoPart.IndexOf(',', searchStart);
+        if (commaIndex < 0 && lastQuote >= 0)
+            commaIndex = -1; // attributes only, no display name
+
         if (commaIndex >= 0)
         {
             channel.Name = infoPart.Substring(commaIndex + 1).Trim();

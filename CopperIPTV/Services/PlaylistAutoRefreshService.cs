@@ -59,25 +59,14 @@ public static class PlaylistAutoRefreshService
 
             LogService.Info($"Auto-refreshing playlist: {playlist.Name}");
 
-            var result = await PlaylistService.FetchAndParseUrl(playlist.SourceUrl);
-            if (result.success && result.channels != null)
+            var success = await PlaylistService.RefreshPlaylist(playlist.Id);
+            if (success)
             {
-                db.DeleteChannelsByPlaylistId(playlist.Id);
-                foreach (var ch in result.channels)
-                {
-                    ch.PlaylistId = playlist.Id.ToString();
-                }
-                db.BulkInsertChannels(result.channels);
-
-                playlist.ChannelCount = result.channels.Count;
-                playlist.LastRefreshed = DateTime.UtcNow;
-                db.UpdatePlaylist(playlist);
-
-                LogService.Info($"Refreshed {playlist.Name}: {result.channels.Count} channels");
+                LogService.Info($"Auto-refresh succeeded for {playlist.Name}");
             }
             else
             {
-                LogService.Warning($"Failed to refresh {playlist.Name}: {result.error}");
+                LogService.Warning($"Auto-refresh failed for {playlist.Name}");
             }
         }
     }

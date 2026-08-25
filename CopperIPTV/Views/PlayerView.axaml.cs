@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -162,11 +163,6 @@ public partial class PlayerView : UserControl, IDisposable
         }
     }
 
-    private void OnWindowKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (DataContext is PlayerViewModel)
-            OnGlobalKey(e.Key);
-    }
 
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
@@ -405,7 +401,11 @@ public partial class PlayerView : UserControl, IDisposable
 
         if (DataContext is PlayerViewModel vm)
         {
+            if (_vm != null)
+                _vm.PropertyChanged -= OnViewModelPropertyChanged;
+
             _vm = vm;
+            _vm.PropertyChanged += OnViewModelPropertyChanged;
             _isFirstPlay = true;
             _hasError = false;
             UpdateFavoriteUI(vm.IsFavorite);
@@ -435,9 +435,21 @@ public partial class PlayerView : UserControl, IDisposable
         else
         {
             LogService.Debug("PlayerView DataContext cleared - cleaning up");
+            if (_vm != null)
+                _vm.PropertyChanged -= OnViewModelPropertyChanged;
             UnregisterGlobalKeyHandler();
             StopPlayback();
         }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_vm == null || sender != _vm) return;
+
+        if (e.PropertyName == nameof(PlayerViewModel.IsFavorite))
+            UpdateFavoriteUI(_vm.IsFavorite);
+        else if (e.PropertyName == nameof(PlayerViewModel.StreamQuality))
+            UpdateQualityIndicator(_vm.StreamQuality);
     }
 
     private void PlayMedia(string url)
@@ -521,6 +533,9 @@ public partial class PlayerView : UserControl, IDisposable
             ClearVideoView();
             DestroyMediaPlayer();
             InitializeMediaPlayer();
+
+            // Route through the ViewModel so the fallback URL logic applies.
+            _vm.RetryStreamCommand.Execute(null);
             PlayMedia(_vm.MediaUrl);
         }
     }
@@ -649,6 +664,7 @@ public partial class PlayerView : UserControl, IDisposable
     {
         if (_isDisposed) return;
         _hasError = true;
+        if (_vm != null) _vm.HasError = true;
         var state = _mediaPlayer?.State.ToString() ?? "Unknown";
         var elapsed = DateTime.UtcNow - _errorTime;
         string message;
@@ -701,6 +717,7 @@ public partial class PlayerView : UserControl, IDisposable
     {
         if (_isDisposed) return;
         _hasError = true;
+        if (_vm != null) _vm.HasError = true;
         LogService.Warning("VLC Event: EndReached");
         _seekUpdateTimer?.Stop();
         try
@@ -863,6 +880,10 @@ public partial class PlayerView : UserControl, IDisposable
         ClearVideoView();
         DestroyMediaPlayer();
 
+        if (_vm != null)
+            _vm.PropertyChanged -= OnViewModelPropertyChanged;
+        _vm = null;
+
         GC.SuppressFinalize(this);
     }
 
@@ -871,9 +892,6 @@ public partial class PlayerView : UserControl, IDisposable
         base.OnAttachedToVisualTree(e);
         if (DataContext is PlayerViewModel)
             RegisterGlobalKeyHandler();
-
-        if (VisualRoot is Window window)
-            window.AddHandler(InputElement.KeyDownEvent, OnWindowKeyDown, RoutingStrategies.Tunnel, true);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -882,35 +900,18 @@ public partial class PlayerView : UserControl, IDisposable
         var elapsed = DateTime.UtcNow - _errorTime;
         LogService.Debug($"PlayerView detached - State: {state}, Playback time: {elapsed.TotalSeconds:F1}s");
 
-        _seekUpdateTimer?.Stop();
-        _hidePlayPauseTimer?.Stop();
+        // Route through DestroyMediaPlayer so all VLC event handlers are
+        // unsubscribed BEFORE the native player is disposed; otherwise late
+        // async events (Stopped/EndReached/EncounteredError) hit a disposed
+        // native object.
+        ClearVideoView();
+        DestroyMediaPlayer();
 
-        try
-        {
-            if (VideoView != null)
-            {
-                VideoView.IsVisible = false;
-                VideoView.MediaPlayer = null;
-                _isVideoViewDetached = true;
-            }
-        }
-        catch { }
-
-        try
-        {
-            if (_mediaPlayer != null)
-            {
-                try { _mediaPlayer.Stop(); } catch { }
-                _mediaPlayer.Dispose();
-                _mediaPlayer = null;
-            }
-        }
-        catch { }
+        if (_vm != null)
+            _vm.PropertyChanged -= OnViewModelPropertyChanged;
+        _vm = null;
 
         UnregisterGlobalKeyHandler();
-
-        if (VisualRoot is Window window)
-            window.RemoveHandler(InputElement.KeyDownEvent, OnWindowKeyDown);
 
         base.OnDetachedFromVisualTree(e);
     }

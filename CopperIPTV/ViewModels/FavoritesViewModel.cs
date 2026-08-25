@@ -57,8 +57,21 @@ public partial class FavoritesViewModel : ViewModelBase
     [RelayCommand]
     private void OpenChannel(Channel channel)
     {
-        var allChannels = DatabaseService.Instance.GetAllChannels();
-        _mainVm.NavigateToPlayer(channel, allChannels);
+        _mainVm.NavigateToPlayer(channel, FavoriteChannels.ToList());
+    }
+
+    [RelayCommand]
+    private void DeleteChannel(Channel channel)
+    {
+        DatabaseService.Instance.DeleteChannel(channel.Id);
+        LoadFavorites();
+    }
+
+    [RelayCommand]
+    private void ToggleFavorite(Channel channel)
+    {
+        DatabaseService.Instance.DeleteFavorite(channel.Id);
+        LoadFavorites();
     }
 
     [RelayCommand]

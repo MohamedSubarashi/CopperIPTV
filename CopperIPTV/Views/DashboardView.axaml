@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CopperIPTV.ViewModels"
              xmlns:m="using:CopperIPTV.Models"
+             xmlns:controls="using:CopperIPTV.Controls"
              x:Class="CopperIPTV.Views.DashboardView"
              x:DataType="vm:DashboardViewModel"
              Padding="24">
@@ -52,11 +53,22 @@
                         <DataTemplate x:DataType="m:Channel">
                             <Button Margin="10" Padding="0" Background="Transparent" BorderThickness="0"
                                     Click="OnChannelClick" Width="220">
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Open" Click="OnMenuOpenClick" />
+                                        <MenuItem Header="Add to Favorites" Click="OnMenuToggleFavoriteClick"
+                                                  IsVisible="{Binding !IsFavorite}" />
+                                        <MenuItem Header="Remove from Favorites" Click="OnMenuToggleFavoriteClick"
+                                                  IsVisible="{Binding IsFavorite}" />
+                                        <Separator />
+                                        <MenuItem Header="Delete Channel" Click="OnMenuDeleteClick" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
                                 <Border Classes="card" Width="200">
                                     <StackPanel>
                                         <Border Height="113" Background="#1a1a1a" CornerRadius="12,12,0,0">
                                             <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Image x:Name="ChLogo" Source="{Binding Logo}" MaxWidth="120" MaxHeight="80" Stretch="Uniform"
+                                                <Image x:Name="ChLogo" controls:AsyncImageLoader.Source="{Binding Logo}" MaxWidth="120" MaxHeight="80" Stretch="Uniform"
                                                        IsVisible="{Binding Logo, Converter={StaticResource NotEmptyStringConverter}}" />
                                                 <Border x:Name="ChPlaceholder" Width="60" Height="60" CornerRadius="30" Background="#c4781a"
                                                         IsVisible="{Binding Logo, Converter={StaticResource EmptyStringConverter}}">

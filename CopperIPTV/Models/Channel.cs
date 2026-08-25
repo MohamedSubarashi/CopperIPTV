@@ -19,4 +19,8 @@ public class Channel
     public string FallbackUrl { get; set; } = string.Empty;
     public int HealthScore { get; set; } = 100;
     public DateTime LastChecked { get; set; } = DateTime.MinValue;
+
+    // Not persisted; resolved from the Favorite table when loading lists.
+    [Ignore]
+    public bool IsFavorite { get; set; }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -26,6 +27,10 @@ public partial class RecentChannelsViewModel : ViewModelBase
     {
         var db = DatabaseService.Instance;
         var channels = db.GetRecentChannels(20);
+        var favIds = db.GetFavoriteIds();
+        foreach (var ch in channels)
+            ch.IsFavorite = favIds.Contains(ch.Id);
+
         RecentChannels = new ObservableCollection<Channel>(channels);
         HasRecentChannels = channels.Count > 0;
     }
@@ -33,8 +38,25 @@ public partial class RecentChannelsViewModel : ViewModelBase
     [RelayCommand]
     private void OpenChannel(Channel channel)
     {
-        var allChannels = DatabaseService.Instance.GetAllChannels();
-        _mainVm.NavigateToPlayer(channel, allChannels);
+        _mainVm.NavigateToPlayer(channel, RecentChannels.ToList());
+    }
+
+    [RelayCommand]
+    private void DeleteChannel(Channel channel)
+    {
+        DatabaseService.Instance.DeleteChannel(channel.Id);
+        LoadRecentChannels();
+    }
+
+    [RelayCommand]
+    private void ToggleFavorite(Channel channel)
+    {
+        var db = DatabaseService.Instance;
+        if (channel.IsFavorite)
+            db.DeleteFavorite(channel.Id);
+        else
+            db.InsertFavorite(new Favorite { ChannelId = channel.Id });
+        LoadRecentChannels();
     }
 
     [RelayCommand]

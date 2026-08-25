@@ -40,6 +40,10 @@ public partial class DashboardViewModel : ViewModelBase
     {
         var db = DatabaseService.Instance;
         var channels = db.GetAllChannels();
+        var favIds = db.GetFavoriteIds();
+        foreach (var ch in channels)
+            ch.IsFavorite = favIds.Contains(ch.Id);
+
         AllChannels = new ObservableCollection<Channel>(channels);
         HasChannels = channels.Count > 0;
 
@@ -69,7 +73,25 @@ public partial class DashboardViewModel : ViewModelBase
     [RelayCommand]
     private void OpenChannel(Channel channel)
     {
-        _mainVm.NavigateToPlayer(channel, AllChannels.ToList());
+        _mainVm.NavigateToPlayer(channel, FilteredChannels.ToList());
+    }
+
+    [RelayCommand]
+    private void DeleteChannel(Channel channel)
+    {
+        DatabaseService.Instance.DeleteChannel(channel.Id);
+        LoadChannels();
+    }
+
+    [RelayCommand]
+    private void ToggleFavorite(Channel channel)
+    {
+        var db = DatabaseService.Instance;
+        if (channel.IsFavorite)
+            db.DeleteFavorite(channel.Id);
+        else
+            db.InsertFavorite(new Favorite { ChannelId = channel.Id });
+        LoadChannels();
     }
 
     [RelayCommand]

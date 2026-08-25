@@ -19,7 +19,7 @@ public static class StreamHealthService
     {
         try
         {
-            var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             if (response.IsSuccessStatusCode)
                 return 100;
             return (int)(response.StatusCode switch
@@ -39,7 +39,6 @@ public static class StreamHealthService
 
     public static async Task CheckAllChannels()
     {
-        _isRunning = true;
         var channels = DatabaseService.Instance.GetAllChannels();
         var db = DatabaseService.Instance;
 
@@ -51,7 +50,9 @@ public static class StreamHealthService
             db.UpdateChannelHealth(ch.Id, score - ch.HealthScore);
             LogService.Debug($"Health check: {ch.Name} = {score}%");
 
-            if (!string.IsNullOrEmpty(ch.FallbackUrl) && score < 50)
+            // Guard against self-comparison: once a switch has happened,
+            // Url == FallbackUrl and probing both is pointless.
+            if (!string.IsNullOrEmpty(ch.FallbackUrl) && ch.FallbackUrl != ch.Url && score < 50)
             {
                 var fallbackScore = await CheckStreamHealth(ch.FallbackUrl);
                 if (fallbackScore > score)
@@ -63,7 +64,6 @@ public static class StreamHealthService
             }
         }
 
-        _isRunning = false;
         LogService.Info("Health check complete");
     }
 
@@ -71,13 +71,21 @@ public static class StreamHealthService
     {
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
+        _isRunning = true;
 
         Task.Run(async () =>
         {
-            while (!_cts.Token.IsCancellationRequested)
+            try
             {
-                await CheckAllChannels();
-                await Task.Delay(TimeSpan.FromMinutes(intervalMinutes), _cts.Token);
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    await CheckAllChannels();
+                    await Task.Delay(TimeSpan.FromMinutes(intervalMinutes), _cts.Token);
+                }
+            }
+            finally
+            {
+                _isRunning = false;
             }
         }, _cts.Token);
 

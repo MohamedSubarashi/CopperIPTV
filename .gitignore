@@ -1,35 +1,25 @@
-## Build outputs
-**/bin/
-**/obj/
-**/out/
+# Build artifacts
+bin/
+obj/
+publish/
+*.user
+*.suo
 
-## IDE
-**/*.user
-**/*.suo
-**/*.userosscache
-**/*.sln.docstates
+# IDE
 .vs/
+.vscode/
 .idea/
 *.swp
-*.swo
 
-## OS
-.DS_Store
+# OS junk
 Thumbs.db
+.DS_Store
 
-## Logs & DB
-*.log
+# App data created during local runs
 *.db
+*.log
 
-## Publish
-**/publish/
-
-## User data
+# Personal playlists - never publish these
 *.m3u
 *.m3u8
-*.txt
-*.db
-*.log
-
-## Release artifacts
-*.zip
+player.txt

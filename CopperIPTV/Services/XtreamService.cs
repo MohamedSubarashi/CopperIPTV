@@ -11,6 +11,10 @@ public static class XtreamService
 {
     private static readonly HttpClient _httpClient;
 
+    // Credentials can contain reserved characters (&, +, /, spaces) that break
+    // query strings and path segments if inserted raw.
+    private static string Esc(string value) => Uri.EscapeDataString(value);
+
     static XtreamService()
     {
         var handler = new HttpClientHandler
@@ -26,7 +30,7 @@ public static class XtreamService
     public static async Task<(bool success, string error, XtreamAuthInfo? authInfo)> Authenticate(string serverUrl, string username, string password)
     {
         var baseUrl = NormalizeServerUrl(serverUrl);
-        var apiUrl = $"{baseUrl}/player_api.php?username={username}&password={password}";
+        var apiUrl = $"{baseUrl}/player_api.php?username={Esc(username)}&password={Esc(password)}";
 
         LogService.Info($"Xtream: Authenticating to {baseUrl}");
 
@@ -86,7 +90,7 @@ public static class XtreamService
     public static async Task<List<Channel>> GetLiveChannels(XtreamAccount account)
     {
         var channels = new List<Channel>();
-        var apiUrl = $"{account.ServerUrl}/player_api.php?username={account.Username}&password={account.Password}&action=get_live_streams";
+        var apiUrl = $"{account.ServerUrl}/player_api.php?username={Esc(account.Username)}&password={Esc(account.Password)}&action=get_live_streams";
 
         LogService.Info($"Xtream: Fetching live streams from {account.ServerUrl}");
 
@@ -138,7 +142,7 @@ public static class XtreamService
     public static async Task<List<Channel>> GetLiveChannelsWithCategories(XtreamAccount account)
     {
         var channels = new List<Channel>();
-        var catUrl = $"{account.ServerUrl}/player_api.php?username={account.Username}&password={account.Password}&action=get_live_categories";
+        var catUrl = $"{account.ServerUrl}/player_api.php?username={Esc(account.Username)}&password={Esc(account.Password)}&action=get_live_categories";
 
         var catMap = new Dictionary<string, string>();
         try
@@ -155,7 +159,7 @@ public static class XtreamService
         }
         catch { }
 
-        var apiUrl = $"{account.ServerUrl}/player_api.php?username={account.Username}&password={account.Password}&action=get_live_streams";
+        var apiUrl = $"{account.ServerUrl}/player_api.php?username={Esc(account.Username)}&password={Esc(account.Password)}&action=get_live_streams";
 
         LogService.Info($"Xtream: Fetching live streams with categories");
 
@@ -207,7 +211,7 @@ public static class XtreamService
     public static async Task<List<Channel>> GetVodChannels(XtreamAccount account)
     {
         var channels = new List<Channel>();
-        var catUrl = $"{account.ServerUrl}/player_api.php?username={account.Username}&password={account.Password}&action=get_vod_categories";
+        var catUrl = $"{account.ServerUrl}/player_api.php?username={Esc(account.Username)}&password={Esc(account.Password)}&action=get_vod_categories";
 
         var catMap = new Dictionary<string, string>();
         try
@@ -224,7 +228,7 @@ public static class XtreamService
         }
         catch { }
 
-        var apiUrl = $"{account.ServerUrl}/player_api.php?username={account.Username}&password={account.Password}&action=get_vod_streams";
+        var apiUrl = $"{account.ServerUrl}/player_api.php?username={Esc(account.Username)}&password={Esc(account.Password)}&action=get_vod_streams";
 
         LogService.Info($"Xtream: Fetching VOD streams");
 
@@ -284,7 +288,7 @@ public static class XtreamService
 
     public static string BuildStreamUrl(XtreamAccount account, string streamId, string type, string extension)
     {
-        return $"{account.ServerUrl}/{type}/{account.Username}/{account.Password}/{streamId}.{extension}";
+        return $"{account.ServerUrl}/{type}/{Esc(account.Username)}/{Esc(account.Password)}/{streamId}.{extension}";
     }
 
     private static string NormalizeServerUrl(string url)

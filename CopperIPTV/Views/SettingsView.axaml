@@ -39,19 +39,6 @@
 
                         <Border Height="1" Background="#2a2a2a" />
 
-                        <!-- FG Code Tab -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Add from FG Code (DramaLive)" FontWeight="SemiBold" FontSize="14" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBox Text="{Binding FgCode}" Watermark="232425 or fgcode.org/232425" Width="400" />
-                                <Button Classes="accent" Content="Fetch" Command="{Binding AddFromFgCodeCommand}"
-                                        IsEnabled="{Binding !IsLoading}" />
-                            </StackPanel>
-                            <TextBlock Text="Enter just the code number or full fgcode.org URL" Classes="muted" FontSize="11" />
-                        </StackPanel>
-
-                        <Border Height="1" Background="#2a2a2a" />
-
                         <!-- File Tab -->
                         <StackPanel Spacing="8">
                             <TextBlock Text="Add from File" FontWeight="SemiBold" FontSize="14" />
@@ -80,7 +67,14 @@
                                         <Grid ColumnDefinitions="*,Auto">
                                             <StackPanel Spacing="4">
                                                 <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Medium" />
-                                                <TextBlock Classes="subtitle" Text="{Binding ChannelCount, StringFormat='{}{0} channels • Added {1:d}'}" />
+                                                <TextBlock Classes="subtitle">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} channels • Added {1:d}">
+                                                            <Binding Path="ChannelCount" />
+                                                            <Binding Path="AddedAt" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
                                                 <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
                                                     <TextBlock Text="Auto-refresh: " Classes="muted" FontSize="11" />
                                                     <TextBlock FontSize="11">

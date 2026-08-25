@@ -11,8 +11,7 @@
             SystemDecorations="Full"
             CanResize="True"
             Background="#0a0a0a"
-            Focusable="True"
-            KeyDown="OnKeyDown">
+            Focusable="True">
 
     <Grid>
         <Grid.ColumnDefinitions>

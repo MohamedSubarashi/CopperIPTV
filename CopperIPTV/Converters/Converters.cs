@@ -50,7 +50,7 @@ public class FirstCharConverter : IValueConverter
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is string s && s.Length > 0)
-            return s[0].ToString().ToUpper();
+            return s[0].ToString().ToUpperInvariant();
         return "?";
     }
 

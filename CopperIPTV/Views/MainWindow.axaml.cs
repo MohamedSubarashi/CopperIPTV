@@ -19,12 +19,4 @@ public partial class MainWindow : Window
             vm.HandleKey(e.Key);
         }
     }
-
-    private void OnKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (DataContext is ViewModels.MainViewModel vm)
-        {
-            vm.HandleKey(e.Key);
-        }
-    }
 }

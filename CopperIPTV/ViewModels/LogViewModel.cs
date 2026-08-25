@@ -35,6 +35,11 @@ public partial class LogViewModel : ViewModelBase
         UpdateCounts();
     }
 
+    public void Detach()
+    {
+        LogService.OnLogAdded -= OnLogAdded;
+    }
+
     private void UpdateCounts()
     {
         EntryCount = Entries.Count;

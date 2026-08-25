@@ -30,7 +30,7 @@ public static class EpgService
         return programs;
     }
 
-    public static async Task<List<EpgProgram>> FetchAllEpg(string url, Dictionary<string, string> tvgIdMap)
+    public static async Task<List<EpgProgram>> FetchAllEpg(string url, Dictionary<string, List<string>> tvgIdMap)
     {
         var allPrograms = new List<EpgProgram>();
         try
@@ -76,17 +76,20 @@ public static class EpgService
                 else if (xml.NodeType == XmlNodeType.EndElement && xml.Name == "programme" && inProgram)
                 {
                     inProgram = false;
-                    if (!string.IsNullOrEmpty(currentChannelId) && tvgIdMap.TryGetValue(currentChannelId, out var dbChannelId))
+                    if (!string.IsNullOrEmpty(currentChannelId) && tvgIdMap.TryGetValue(currentChannelId, out var dbChannelIds))
                     {
-                        allPrograms.Add(new EpgProgram
+                        foreach (var dbChannelId in dbChannelIds)
                         {
-                            ChannelId = dbChannelId,
-                            Title = title,
-                            Description = desc,
-                            Start = start,
-                            Stop = stop,
-                            Category = category
-                        });
+                            allPrograms.Add(new EpgProgram
+                            {
+                                ChannelId = dbChannelId,
+                                Title = title,
+                                Description = desc,
+                                Start = start,
+                                Stop = stop,
+                                Category = category
+                            });
+                        }
                     }
                 }
             }
@@ -173,8 +176,17 @@ public static class EpgService
         if (string.IsNullOrEmpty(epgUrl)) return false;
 
         var channels = DatabaseService.Instance.GetAllChannels();
-        var tvgIdMap = channels.Where(c => !string.IsNullOrEmpty(c.TvgId))
-            .ToDictionary(c => c.TvgId, c => c.Id);
+        var tvgIdMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var c in channels)
+        {
+            if (string.IsNullOrEmpty(c.TvgId)) continue;
+            if (!tvgIdMap.TryGetValue(c.TvgId, out var list))
+            {
+                list = new List<string>();
+                tvgIdMap[c.TvgId] = list;
+            }
+            list.Add(c.Id);
+        }
 
         var programs = await FetchAllEpg(epgUrl, tvgIdMap);
         if (programs.Count == 0) return false;

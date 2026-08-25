@@ -34,9 +34,6 @@ public partial class SettingsViewModel : ViewModelBase
     private string? _statusMessage;
 
     [ObservableProperty]
-    private string _fgCode = string.Empty;
-
-    [ObservableProperty]
     private bool _isLoading;
 
     [ObservableProperty]
@@ -146,23 +143,6 @@ public partial class SettingsViewModel : ViewModelBase
             RefreshIntervalMinutes = p.RefreshIntervalMinutes,
             LastRefreshed = p.LastRefreshed
         }));
-    }
-
-    [RelayCommand]
-    private async Task AddFromFgCode()
-    {
-        if (string.IsNullOrWhiteSpace(FgCode))
-        {
-            StatusMessage = "Please enter an FG Code.";
-            return;
-        }
-
-        IsLoading = true;
-        StatusMessage = null;
-
-        var code = FgCode.Replace("http://", "").Replace("https://", "").Replace("fgcode.org/", "").Replace("fgcode.store/", "").Trim();
-        var result = await FGCodeFetcher.FetchByCode(code);
-        await ProcessResultAsync(result, string.IsNullOrWhiteSpace(PlaylistName) ? $"FG Code: {code}" : PlaylistName, $"fgcode:{code}");
     }
 
     [RelayCommand]
@@ -292,6 +272,9 @@ public partial class SettingsViewModel : ViewModelBase
         db.SetSetting("epg_url", EpgUrl);
         db.SetSetting("default_volume", DefaultVolume.ToString());
         db.SetSetting("network_caching", NetworkCaching.ToString());
+        db.SetSetting("auto_health_check", AutoHealthCheck.ToString());
+        db.SetSetting("health_check_interval", HealthCheckInterval.ToString());
+        db.SetSetting("auto_playlist_refresh", AutoPlaylistRefresh.ToString());
         StatusMessage = "Settings saved!";
     }
 
@@ -315,6 +298,7 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleHealthCheck()
     {
+        var db = DatabaseService.Instance;
         if (StreamHealthService.IsRunning)
         {
             StreamHealthService.StopAutoCheck();
@@ -327,6 +311,8 @@ public partial class SettingsViewModel : ViewModelBase
             HealthStatus = $"Running (every {HealthCheckInterval}min)";
             AutoHealthCheck = true;
         }
+        db.SetSetting("auto_health_check", AutoHealthCheck.ToString());
+        db.SetSetting("health_check_interval", HealthCheckInterval.ToString());
     }
 
     [RelayCommand]
@@ -348,6 +334,7 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void TogglePlaylistRefreshService()
     {
+        var db = DatabaseService.Instance;
         if (PlaylistAutoRefreshService.IsRunning)
         {
             PlaylistAutoRefreshService.Stop();
@@ -360,6 +347,7 @@ public partial class SettingsViewModel : ViewModelBase
             RefreshStatus = "Running";
             AutoPlaylistRefresh = true;
         }
+        db.SetSetting("auto_playlist_refresh", AutoPlaylistRefresh.ToString());
     }
 
     private static TopLevel? GetTopLevel()
@@ -430,39 +418,53 @@ public partial class SettingsViewModel : ViewModelBase
             SeriesCount = authInfo.SeriesCount
         };
 
-        var (live, vod) = await XtreamService.SyncAllChannels(account);
-        var allChannels = new List<Channel>();
-        allChannels.AddRange(live);
-        if (IncludeVod) allChannels.AddRange(vod);
-
-        if (allChannels.Count == 0)
-        {
-            XtreamStatus = "No channels found. Check your subscription.";
-            IsXtreamSyncing = false;
-            return;
-        }
-
         var db = DatabaseService.Instance;
         db.InsertXtreamAccount(account);
         var accountId = account.Id;
 
-        foreach (var ch in allChannels)
-            ch.PlaylistId = $"xtream_{accountId}";
-
-        db.BulkInsertChannels(allChannels);
-
-        var playlist = new Playlist
+        try
         {
-            Name = authInfo.ServerName ?? "Xtream",
-            SourceUrl = $"xtream_{accountId}",
-            ChannelCount = allChannels.Count,
-            AutoRefresh = AutoPlaylistRefresh,
-            RefreshIntervalMinutes = 60,
-            LastRefreshed = DateTime.UtcNow
-        };
-        db.InsertPlaylist(playlist);
+            var (live, vod) = await XtreamService.SyncAllChannels(account);
+            var allChannels = new List<Channel>();
+            allChannels.AddRange(live);
+            if (IncludeVod) allChannels.AddRange(vod);
 
-        XtreamStatus = $"Added {live.Count} live + {(IncludeVod ? vod.Count : 0)} VOD from {authInfo.ServerName}";
+            if (allChannels.Count == 0)
+            {
+                db.DeleteXtreamAccount(accountId);
+                XtreamStatus = "No channels found. Check your subscription.";
+                IsXtreamSyncing = false;
+                return;
+            }
+
+            foreach (var ch in allChannels)
+                ch.PlaylistId = $"xtream_{accountId}";
+
+            db.BulkInsertChannels(allChannels);
+            db.UpdateXtreamAccount(account);
+
+            var playlist = new Playlist
+            {
+                Name = authInfo.ServerName ?? "Xtream",
+                SourceUrl = $"xtream_{accountId}",
+                ChannelCount = allChannels.Count,
+                AutoRefresh = AutoPlaylistRefresh,
+                RefreshIntervalMinutes = 60,
+                LastRefreshed = DateTime.UtcNow
+            };
+            db.InsertPlaylist(playlist);
+
+            XtreamStatus = $"Added {live.Count} live + {(IncludeVod ? vod.Count : 0)} VOD from {authInfo.ServerName}";
+        }
+        catch (Exception ex)
+        {
+            db.DeleteXtreamAccount(accountId);
+            LogService.Error(ex, "Failed to sync Xtream channels during login");
+            XtreamStatus = $"Sync failed: {ex.Message}";
+            IsXtreamSyncing = false;
+            return;
+        }
+
         LoadXtreamAccounts();
         LoadPlaylists();
         XtreamServerUrl = string.Empty;

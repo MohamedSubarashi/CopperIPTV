@@ -203,7 +203,7 @@ public static class PlaylistService
             if (pathParts.Length == 1)
             {
                 var usernameOrCode = pathParts[0];
-                var baseUrl = $"{uri.Scheme}://{uri.Authority}/get.php?username={usernameOrCode}&password=&type=m3u_plus&output=ts";
+                var baseUrl = $"{uri.Scheme}://{uri.Authority}/get.php?username={Uri.EscapeDataString(usernameOrCode)}&password=&type=m3u_plus&output=ts";
                 LogService.Debug($"Built Xtream URL: {baseUrl}");
                 return baseUrl;
             }
@@ -240,7 +240,7 @@ public static class PlaylistService
 
                 LogService.Info($"Extracted Xtream credentials - user: {username}");
 
-                var m3uUrl = $"{uri.Scheme}://{uri.Authority}/get.php?username={username}&password={password}&type=m3u_plus&output=ts";
+                var m3uUrl = $"{uri.Scheme}://{uri.Authority}/get.php?username={Uri.EscapeDataString(username)}&password={Uri.EscapeDataString(password)}&type=m3u_plus&output=ts";
                 LogService.Info($"Generated M3U URL: {m3uUrl}");
 
                 var m3uContent = await _httpClient.GetStringAsync(m3uUrl);
@@ -332,7 +332,23 @@ public static class PlaylistService
         if (playlist == null || string.IsNullOrEmpty(playlist.SourceUrl)) return false;
 
         LogService.Info($"Refreshing playlist: {playlist.Name}");
-        var result = await FetchAndParseUrl(playlist.SourceUrl);
+
+        (bool success, string? error, List<Channel>? channels) result;
+        if (playlist.SourceUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+            playlist.SourceUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            result = await FetchAndParseUrl(playlist.SourceUrl);
+        }
+        else if (File.Exists(playlist.SourceUrl))
+        {
+            result = ParseFile(playlist.SourceUrl);
+        }
+        else
+        {
+            LogService.Warning($"Cannot refresh playlist '{playlist.Name}': Source is not a URL and local file does not exist ({playlist.SourceUrl})");
+            return false;
+        }
+
         if (!result.success || result.channels == null) return false;
 
         await Task.Run(() =>

@@ -19,8 +19,11 @@ class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        AllocConsole();
-        Console.Title = "Copper IPTV Player - Debug Log";
+        if (OperatingSystem.IsWindows())
+        {
+            AllocConsole();
+            Console.Title = "Copper IPTV Player - Debug Log";
+        }
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
         Log(ConsoleColor.Green, "=== Copper IPTV Player Starting ===");
@@ -76,18 +79,19 @@ class Program
                         var interval = int.TryParse(db.GetSetting("health_check_interval", "30"), out var parsedInterval) ? parsedInterval : 30;
                         Services.StreamHealthService.StartAutoCheck(interval);
                     }
-
-                    desktop.ShutdownRequested += (s, e) =>
-                    {
-                        Services.PlaylistAutoRefreshService.Stop();
-                        Services.StreamHealthService.StopAutoCheck();
-                        SharedLibVLC?.Dispose();
-                        Log(ConsoleColor.Green, "VLC disposed");
-                    };
                 }
             });
 
             appBuilder.StartWithClassicDesktopLifetime(args);
+
+            // Dispose AFTER the main window has fully closed and the visual tree
+            // (including any active MediaPlayer) has been torn down. Disposing
+            // earlier (e.g. in ShutdownRequested) can free native VLC resources
+            // while a live player still references them and crash on exit.
+            Services.PlaylistAutoRefreshService.Stop();
+            Services.StreamHealthService.StopAutoCheck();
+            SharedLibVLC?.Dispose();
+            Log(ConsoleColor.Green, "Services stopped, VLC disposed");
             Log(ConsoleColor.Green, "=== Application Shutdown ===");
         }
         catch (Exception ex)
